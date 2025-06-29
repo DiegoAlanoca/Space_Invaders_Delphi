@@ -11,6 +11,7 @@ type
     x,y,Alto,Ancho,
     v:Word;
     Imagen:TPNGImage;
+    Vivo:Boolean;
     constructor create;
     procedure CargarImagen(ruta:String);
 end;
@@ -29,7 +30,7 @@ end;
 
 constructor Personaje.create;
 begin
-  v := 0;
+  v := 0; Vivo:=True;
 end;
 
 

@@ -9,7 +9,7 @@ type
 
   public
     x,y,Alto,Ancho,
-    Velocidad:Word;
+    Velocidad,NroJugadorAsignado:Word;
     Imagen:TPNGImage;
     Vivo:Boolean;
     constructor create(v:Word);

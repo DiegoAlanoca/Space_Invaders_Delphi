@@ -35,15 +35,21 @@ object pantalla: Tpantalla
     TabOrder = 0
   end
   object TimerPersonaje: TTimer
-    Interval = 10
+    Interval = 15
     OnTimer = TimerPersonajeTimer
     Left = 56
     Top = 48
   end
   object TimerEnemigosYBalas: TTimer
-    Interval = 10
+    Interval = 15
     OnTimer = TimerEnemigosYBalasTimer
     Left = 168
+    Top = 48
+  end
+  object Colisiones: TTimer
+    Interval = 15
+    OnTimer = ColisionesTimer
+    Left = 272
     Top = 48
   end
 end

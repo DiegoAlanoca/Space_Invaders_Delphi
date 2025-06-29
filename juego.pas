@@ -6,14 +6,18 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,JPEG, Vcl.StdCtrls, Vcl.ExtCtrls,PngImage,ClasePersonaje,
   BloqueoClase,ClaseEnemigo, Vcl.MPlayer,ClaseBala;
-const VelocidadBalaJugador=8; CantEnemigosColumnas=11;CantEnemigosFilas=5;
-DistanciaHorzEnem=150; DistanciaFilEnem=90;
+const VelocidadBalaJugador=40; CantEnemigosColumnas=11;CantEnemigosFilas=5;
+DistanciaHorzEnem=110; DistanciaFilEnem=70;
+
+EspaciadoHorzBarreras=400; PosicionX_Inicial_barreras=300; Columnas_Barrera=12; Filas_Barrera=6;
+TamBloqBarrera=10;
 type
   Tpantalla = class(TForm)
     Label1: TLabel;
     TimerPersonaje: TTimer;
     TimerEnemigosYBalas: TTimer;
     MediaPlayer1: TMediaPlayer;
+    Colisiones: TTimer;
     procedure FormPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -21,20 +25,24 @@ type
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TimerPersonajeTimer(Sender: TObject);
     procedure TimerEnemigosYBalasTimer(Sender: TObject);
+    procedure ColisionesTimer(Sender: TObject);
   private
     IzqPers,DerPers:Boolean; AnchoPantalla,LargoPantalla:Word;
     fondo: TJPEGIMage;
     p:Personaje;
-    contdes:Word;
+    contdes,PosicionYIBarrera:Word;
     barrera:Array of TBloqueo;
     barrera2:Array of TBloqueo;
     barrera3:Array of TBloqueo;
     barrera4:Array of TBloqueo;
     EnemigosAliens:Array of enemigo;
     BalaJugador:TBala;
+    CantBalasEnemigasEnPant:Word;
+    BalasEnemigos:Array of TBala;
     procedure crearbarrera(colum,filas,tam,posx,posy:Word);
     procedure CrearEnemigos(PosIX,PosIY:Word);
-
+    procedure CrearBalasEnemigos;
+    procedure VerificarColisionesBarreras;
   public
     { Public declarations }
   end;
@@ -45,6 +53,30 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure Tpantalla.CrearBalasEnemigos;
+var I,J,VelocidadBalaEnemigos: Integer;
+begin
+  Randomize;
+  CantBalasEnemigasEnPant:=Random(6)+1;
+  Setlength(BalasEnemigos,CantBalasEnemigasEnPant);
+  I:=0;
+  while I<length(BalasEnemigos) do
+  begin
+    Randomize; J:=Random(CantEnemigosColumnas*CantEnemigosFilas-1);
+    VelocidadBalaEnemigos:=Random(40)+1;
+    if EnemigosAliens[J].Vivo then
+    begin
+      BalasEnemigos[I]:=TBala.create(VelocidadBalaEnemigos);
+      BalasEnemigos[I].CargarImagen('bala.png');
+      BalasEnemigos[I].NroJugadorAsignado:=J;
+      BalasEnemigos[I].x:=EnemigosAliens[J].x+(EnemigosAliens[J].Ancho div 2);
+      BalasEnemigos[I].y:=EnemigosAliens[J].y;
+      BalasEnemigos[I].Vivo:=True;
+      Inc(I);
+    end;
+  end;
+end;
 
 procedure Tpantalla.crearbarrera(colum,filas,tam,posx,posy:Word);
 var
@@ -58,7 +90,7 @@ begin
       barrera[index] := TBloqueo.Create(posx+i*tam, posy+j*tam, tam);
       Inc(index);
     end;
-  index:=0; posx:=posx+400;
+  index:=0; posx:=posx+EspaciadoHorzBarreras;
   SetLength(barrera2,colum*filas);
   for i:=0 to colum-1 do
     for j:=0 to filas-1 do
@@ -66,7 +98,7 @@ begin
       barrera2[index] := TBloqueo.Create(posx+i*tam, posy+j*tam, tam);
       Inc(index);
     end;
-  index:=0; posx:=posx+400;
+  index:=0; posx:=posx+EspaciadoHorzBarreras;
   SetLength(barrera3,colum*filas);
   for i:=0 to colum-1 do
     for j:=0 to filas-1 do
@@ -74,7 +106,7 @@ begin
       barrera3[index] := TBloqueo.Create(posx+i*tam, posy+j*tam, tam);
       Inc(index);
     end;
-  index:=0; posx:=posx+400;
+  index:=0; posx:=posx+EspaciadoHorzBarreras;
   SetLength(barrera4,colum*filas);
   for i:=0 to colum-1 do
     for j:=0 to filas-1 do
@@ -124,11 +156,13 @@ begin
   DoubleBuffered:=True; keypreview:=True;
   showcursor(False);
   fondo.LoadFromFile('fondo.jpg');
-  crearbarrera(12,6,10,300,p.y-110);
-  CrearEnemigos(200,100);
+  PosicionYIBarrera:=p.y-110;
+  crearbarrera(Columnas_Barrera,Filas_Barrera,TamBloqBarrera,PosicionX_Inicial_barreras,PosicionYIBarrera);
+  CrearEnemigos(400,150);
   contdes:=0;
   BalaJugador:=TBala.Create(VelocidadBalaJugador);
   BalaJugador.CargarImagen('bala.png');
+  CrearBalasEnemigos;
 end;
 
 procedure Tpantalla.FormDblClick(Sender: TObject);
@@ -141,10 +175,10 @@ procedure Tpantalla.FormKeyDown(Sender: TObject; var Key: Word;
 var i:Word;
 begin
   case key of
-    37: IzqPers:=True;
-    39: DerPers:=True;
+    37: if (p.Vivo) then IzqPers:=True;
+    39: if (p.Vivo) then DerPers:=True;
     ord('A'):begin
-              if not BalaJugador.Vivo then
+              if (not BalaJugador.Vivo)and(p.Vivo) then
               begin
                 BalaJugador.Vivo:=True;
                 BalaJugador.x:=p.x+(p.Ancho div 2)-6;
@@ -192,14 +226,47 @@ begin
 
   if BalaJugador.Vivo then Canvas.Draw(BalaJugador.x,BalaJugador.y,BalaJugador.Imagen);
 
+  for I:=0 to Length(BalasEnemigos)-1 do
+    if (BalasEnemigos[I].Vivo)
+    then Canvas.Draw(BalasEnemigos[I].x,BalasEnemigos[I].y,BalasEnemigos[I].Imagen);
+
 end;
 
 procedure Tpantalla.TimerEnemigosYBalasTimer(Sender: TObject);
-var I,J:Integer;
+var I,J:Integer; BanBalasTodas:Boolean;
 begin
-   if (BalaJugador.Vivo)and(BalaJugador.y>1) then BalaJugador.y:=BalaJugador.y-10
+  if (BalaJugador.Vivo)and(BalaJugador.y>1) then BalaJugador.y:=BalaJugador.y-VelocidadBalaJugador
   else BalaJugador.Vivo:=False;
 
+  for I:=0 to CantBalasEnemigasEnPant-1 do
+  if (BalasEnemigos[I].Vivo)and(BalasEnemigos[I].y<LargoPantalla) then BalasEnemigos[I].y:=BalasEnemigos[I].y+10
+  else BalasEnemigos[I].Vivo:=False;
+
+  for I:=0 to length(BalasEnemigos)-1 do
+    if BalasEnemigos[I].Vivo then
+    begin
+      BanBalasTodas:=True;
+      Break;
+    end
+    else BanBalasTodas:=False;
+  if BanBalasTodas=False then CrearBalasEnemigos;
+
+  {Movimiento Aliens}
+
+
+end;
+
+procedure Tpantalla.TimerPersonajeTimer(Sender: TObject);
+begin
+  if (IzqPers)and(p.x>(p.Ancho div 2)-50) then p.x:=p.x-10;
+  if (DerPers)and(p.x+p.Ancho<AnchoPantalla) then p.x:=p.x+10;
+  Repaint;
+  Update;
+end;
+
+procedure Tpantalla.ColisionesTimer(Sender: TObject);
+var I:Integer;
+begin
   for I:=0 to (CantEnemigosColumnas*CantEnemigosFilas)-1 do
   begin
     if (BalaJugador.y<=EnemigosAliens[I].y)and
@@ -212,13 +279,80 @@ begin
     end;
   end;
 
+  if p.Vivo then
+  begin
+    for I:=0 to length(BalasEnemigos) - 1 do
+    begin
+      if BalasEnemigos[I].Vivo then
+      begin
+        if (BalasEnemigos[I].y <= p.y + p.Alto) and
+           (BalasEnemigos[I].y + BalasEnemigos[I].alto >= p.y) and
+           (BalasEnemigos[I].x + BalasEnemigos[I].ancho >= p.x) and
+           (BalasEnemigos[I].x <= p.x + p.ancho) then
+        begin
+          p.Vivo := False;
+          BalasEnemigos[I].Vivo := False;
+          ShowMessage('Game Over');
+          break;
+        end;
+      end;
+    end;
+  end;
+  VerificarColisionesBarreras;
+
 end;
 
-procedure Tpantalla.TimerPersonajeTimer(Sender: TObject);
+procedure Tpantalla.VerificarColisionesBarreras;
+var I,J,PosActX:Integer;
 begin
-  if (IzqPers)and(p.x>(p.Ancho div 2)-50) then p.x:=p.x-10;
-  if (DerPers)and(p.x+p.Ancho<AnchoPantalla) then p.x:=p.x+10;
-  Repaint;
+  PosActX:=PosicionX_Inicial_barreras;
+  for I:=0 to length(BalasEnemigos)-1 do
+    if (BalasEnemigos[I].Vivo) then
+      if (BalasEnemigos[I].y+BalasEnemigos[I].Alto>=PosicionYIBarrera)  and
+      (BalasEnemigos[I].y<=PosicionYIBarrera+(Filas_Barrera*TamBloqBarrera)) and
+      (BalasEnemigos[I].x>=PosActX)  and
+      (BalasEnemigos[I].x+BalasEnemigos[I].Ancho<=PosActX+(Columnas_Barrera*TamBloqBarrera))
+      then
+      begin
+        BalasEnemigos[I].Vivo:=False; randomize;
+        barrera[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
+  PosActX:=PosActX+EspaciadoHorzBarreras;
+  for I:=0 to length(BalasEnemigos)-1 do
+    if (BalasEnemigos[I].Vivo) then
+      if (BalasEnemigos[I].y+BalasEnemigos[I].Alto>=PosicionYIBarrera)  and
+      (BalasEnemigos[I].y<=PosicionYIBarrera+(Filas_Barrera*TamBloqBarrera)) and
+      (BalasEnemigos[I].x>=PosActX)  and
+      (BalasEnemigos[I].x+BalasEnemigos[I].Ancho<=PosActX+(Columnas_Barrera*TamBloqBarrera))
+      then
+      begin
+        BalasEnemigos[I].Vivo:=False; randomize;
+        barrera2[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
+  PosActX:=PosActX+EspaciadoHorzBarreras;
+  for I:=0 to length(BalasEnemigos)-1 do
+    if (BalasEnemigos[I].Vivo) then
+      if (BalasEnemigos[I].y+BalasEnemigos[I].Alto>=PosicionYIBarrera)  and
+      (BalasEnemigos[I].y<=PosicionYIBarrera+(Filas_Barrera*TamBloqBarrera)) and
+      (BalasEnemigos[I].x>=PosActX)  and
+      (BalasEnemigos[I].x+BalasEnemigos[I].Ancho<=PosActX+(Columnas_Barrera*TamBloqBarrera))
+      then
+      begin
+        BalasEnemigos[I].Vivo:=False; randomize;
+        barrera3[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
+  PosActX:=PosActX+EspaciadoHorzBarreras;
+  for I:=0 to length(BalasEnemigos)-1 do
+    if (BalasEnemigos[I].Vivo) then
+      if (BalasEnemigos[I].y+BalasEnemigos[I].Alto>=PosicionYIBarrera)  and
+      (BalasEnemigos[I].y<=PosicionYIBarrera+(Filas_Barrera*TamBloqBarrera)) and
+      (BalasEnemigos[I].x>=PosActX)  and
+      (BalasEnemigos[I].x+BalasEnemigos[I].Ancho<=PosActX+(Columnas_Barrera*TamBloqBarrera))
+      then
+      begin
+        BalasEnemigos[I].Vivo:=False; randomize;
+        barrera4[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
 end;
 
 end.
