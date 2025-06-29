@@ -1,37 +1,36 @@
 unit ClaseBala;
 
 interface
-uses Vcl.Graphics, system.sysutils;
+uses Graphics, sysutils,classes,types,PngImage;
 
 type
  TBala = class
   private
-   w, h: word;
+
   public
-   Top: word;
-   Left: word;
-   textura: TBitMap;
-   property Width: word read w;
-   property Height: word read h;
-   constructor Create(tipo: byte);
+    x,y,Alto,Ancho,
+    Velocidad:Word;
+    Imagen:TPNGImage;
+    Vivo:Boolean;
+    constructor create(v:Word);
+    procedure CargarImagen(ruta:String);
 end;
 
 implementation
 
-{ TBala }
+{ Personaje }
 
-constructor TBala.Create(tipo: byte);
+procedure TBala.CargarImagen(ruta: String);
 begin
-{  textura := TBitMap.Create;
-  case tipo of //1 = el usuario | 2 = los enemigos
-    1: textura.LoadFromFile('balas\bala.bmp');
-    2: textura.LoadFromFile('balas\balaenemiga.bmp');
-  end;
-  textura.Transparent := true;
-  textura.TransparentColor := textura.Canvas.pixels[1, 1];
-  textura.TransparentMode := tmAuto;
-  w:= textura.Width;
-  h:= textura.Height;  }
+  Imagen:=TPNGImage.Create;
+  Imagen.LoadFromFile(ruta);
+  Ancho:=Imagen.Width;
+  Alto:=Imagen.Height;
+end;
+
+constructor TBala.create(v:Word);
+begin
+  Velocidad:=v; Vivo:=False;
 end;
 
 end.

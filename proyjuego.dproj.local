@@ -2,21 +2,23 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2025/05/08 16:15:45.000.442,=C:\Users\Estudiante\Documents\Embarcadero\Studio\Projects\Unit9.pas</Transaction>
-    <Transaction>2025/05/08 16:23:36.000.616,C:\Users\Estudiante\Documents\Embarcadero\Studio\Projects\Unit9.pas=D:\Videojuegos Delphi 08-05\juego.pas</Transaction>
-    <Transaction>2025/05/08 16:23:36.000.616,C:\Users\Estudiante\Documents\Embarcadero\Studio\Projects\Unit9.dfm=D:\Videojuegos Delphi 08-05\juego.dfm</Transaction>
-    <Transaction>2025/05/08 16:23:54.000.521,C:\Users\Estudiante\Documents\Embarcadero\Studio\Projects\Project12.dproj=D:\Videojuegos Delphi 08-05\proyjuego.dproj</Transaction>
+    <Transaction>2025/05/08 16:23:36.000.616,D:\Videojuegos Delphi 08-05\juego.pas=C:\Users\Estudiante\Documents\Embarcadero\Studio\Projects\Unit9.pas</Transaction>
+    <Transaction>2025/05/08 16:23:36.000.616,D:\Videojuegos Delphi 08-05\juego.dfm=C:\Users\Estudiante\Documents\Embarcadero\Studio\Projects\Unit9.dfm</Transaction>
+    <Transaction>2025/05/08 16:23:54.000.521,D:\Videojuegos Delphi 08-05\proyjuego.dproj=C:\Users\Estudiante\Documents\Embarcadero\Studio\Projects\Project12.dproj</Transaction>
     <Transaction>2025/05/12 12:04:55.000.972,=Z:\Videojuegos Delphi 08-05\Unit1.pas</Transaction>
-    <Transaction>2025/05/12 12:11:18.000.817,Z:\Videojuegos Delphi 08-05\Unit1.pas=Z:\Videojuegos Delphi 08-05\pixel.pas</Transaction>
+    <Transaction>2025/05/12 12:11:18.000.817,Z:\Videojuegos Delphi 08-05\pixel.pas=Z:\Videojuegos Delphi 08-05\Unit1.pas</Transaction>
     <Transaction>2025/05/17 11:38:15.000.301,=Z:\Videojuegos Delphi 08-05\Unit1.pas</Transaction>
-    <Transaction>2025/05/17 12:00:52.000.068,Z:\Videojuegos Delphi 08-05\Unit1.pas=Z:\Videojuegos Delphi 08-05\objetos.pas</Transaction>
+    <Transaction>2025/05/17 12:00:52.000.068,Z:\Videojuegos Delphi 08-05\objetos.pas=Z:\Videojuegos Delphi 08-05\Unit1.pas</Transaction>
     <Transaction>2025/05/17 13:12:06.000.550,=Z:\Videojuegos Delphi 08-05\Unit1.pas</Transaction>
     <Transaction>2025/06/28 12:45:58.000.827,=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
-    <Transaction>2025/06/28 12:52:06.000.515,C:\Users\Diego\Desktop\Space_Invaders_Delphi\ClasePersonaje.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
+    <Transaction>2025/06/28 12:52:06.000.515,C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\ClasePersonaje.pas</Transaction>
     <Transaction>2025/06/28 15:55:49.000.995,=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
-    <Transaction>2025/06/28 15:58:59.000.148,C:\Users\Diego\Desktop\Space_Invaders_Delphi\BloqueoClase.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
+    <Transaction>2025/06/28 15:58:59.000.148,C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\BloqueoClase.pas</Transaction>
     <Transaction>2025/06/28 16:25:22.000.616,=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
-    <Transaction>2025/06/28 16:27:17.000.233,C:\Users\Diego\Desktop\Space_Invaders_Delphi\ClaseBala.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
+    <Transaction>2025/06/28 16:27:17.000.233,C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\ClaseBala.pas</Transaction>
     <Transaction>2025/06/28 17:20:11.000.564,=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
-    <Transaction>2025/06/28 17:23:05.000.853,C:\Users\Diego\Desktop\Space_Invaders_Delphi\ClaseEnemigo.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas</Transaction>
+    <Transaction>2025/06/28 17:23:05.000.853,C:\Users\Diego\Desktop\Space_Invaders_Delphi\Unit1.pas=C:\Users\Diego\Desktop\Space_Invaders_Delphi\ClaseEnemigo.pas</Transaction>
+    <Transaction>2025/06/28 21:29:41.131,=C:\Users\Diego\Desktop\Space_Invaders_Delphi\AudioManager.pas</Transaction>
+    <Transaction>2025/06/28 21:29:50.270,C:\Users\Diego\Desktop\Space_Invaders_Delphi\AudioManager.pas=</Transaction>
   </Transactions>
 </BorlandProject>

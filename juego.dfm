@@ -12,7 +12,6 @@ object pantalla: Tpantalla
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  FormStyle = fsStayOnTop
   WindowState = wsMaximized
   OnCreate = FormCreate
   OnDblClick = FormDblClick
@@ -27,14 +26,23 @@ object pantalla: Tpantalla
     Height = 15
     Caption = '1600x1200'
   end
+  object MediaPlayer1: TMediaPlayer
+    Left = 32
+    Top = 144
+    Width = 253
+    Height = 30
+    Visible = False
+    TabOrder = 0
+  end
   object TimerPersonaje: TTimer
     Interval = 10
     OnTimer = TimerPersonajeTimer
     Left = 56
     Top = 48
   end
-  object TimerEnemigos: TTimer
+  object TimerEnemigosYBalas: TTimer
     Interval = 10
+    OnTimer = TimerEnemigosYBalasTimer
     Left = 168
     Top = 48
   end

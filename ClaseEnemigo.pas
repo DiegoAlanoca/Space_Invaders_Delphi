@@ -10,6 +10,7 @@ type
     x,y,Alto,Ancho,
     V:Word;
     Imagen:TPNGImage;
+    Vivo:Boolean;
     constructor Create;
     procedure CargarImagen(ruta:String);
   end;
@@ -18,7 +19,7 @@ implementation
 
 constructor enemigo.Create;
 begin
-  V:=0;
+  V:=0; Vivo:=True;
 end;
 
 procedure enemigo.cargarImagen(ruta:String);
