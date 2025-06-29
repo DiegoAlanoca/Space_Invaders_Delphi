@@ -4,52 +4,39 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,JPEG, Vcl.StdCtrls, Vcl.ExtCtrls;
-
-type
-  TBloqueo = class(TObject)
-  public
-    x,y,tam:Word; vivo:Boolean;
-    constructor Create(ax,ay,xtam:Word);
-    procedure Dibujar(Canvas: TCanvas);
-    procedure Destruir;
-  end;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,JPEG, Vcl.StdCtrls, Vcl.ExtCtrls,PngImage,ClasePersonaje,
+  BloqueoClase,ClaseEnemigo;
 
 type
   Tpantalla = class(TForm)
     Label1: TLabel;
-    Shape1: TShape;
+    TimerPersonaje: TTimer;
+    TimerEnemigos: TTimer;
     procedure FormPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormDblClick(Sender: TObject);
-    procedure Shape1MouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Integer);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure TimerPersonajeTimer(Sender: TObject);
   private
-    img : TJPEGIMage; contdes:Word;
+    IzqPers,DerPers:Boolean; AnchoPantalla,LargoPantalla:Word;
+    fondo: TJPEGIMage;
+    p:Personaje;
+    contdes:Word;
     barrera:Array of TBloqueo;
     barrera2:Array of TBloqueo;
+    barrera3:Array of TBloqueo;
+    barrera4:Array of TBloqueo;
+    EnemigosAliens:Array of enemigo;
     procedure crearbarrera(colum,filas,tam,posx,posy:Word);
+    procedure CrearEnemigos(CantEnemigos,PosIX,PosIY:Word);
+
   public
     { Public declarations }
   end;
 
-type
-  Tplayer = class(TObject)
-    private
-      colplay:TColor;
-      tamrectan:Word;
-      tamtri:Word;
-      TpTrian:Array[0..2] of TPoint;
-    public
-      px,py:Word;
-      constructor Create;
-      procedure Dibujar(Canvas: TCanvas);
-    end;
-
 var
   pantalla: Tpantalla;
-  player:TPlayer;
   bloqueo:TBloqueo;
 implementation
 
@@ -57,7 +44,7 @@ implementation
 
 procedure Tpantalla.crearbarrera(colum,filas,tam,posx,posy:Word);
 var
-  i,j,index:Word;
+  i,j,index,posxtemp:Word;
 begin
   index:=0;
   SetLength(barrera,colum*filas);
@@ -67,21 +54,57 @@ begin
       barrera[index] := TBloqueo.Create(posx+i*tam, posy+j*tam, tam);
       Inc(index);
     end;
+  index:=0; posx:=posx+400;
+  SetLength(barrera2,colum*filas);
+  for i:=0 to colum-1 do
+    for j:=0 to filas-1 do
+    begin
+      barrera2[index] := TBloqueo.Create(posx+i*tam, posy+j*tam, tam);
+      Inc(index);
+    end;
+  index:=0; posx:=posx+400;
+  SetLength(barrera3,colum*filas);
+  for i:=0 to colum-1 do
+    for j:=0 to filas-1 do
+    begin
+      barrera3[index] := TBloqueo.Create(posx+i*tam, posy+j*tam, tam);
+      Inc(index);
+    end;
+  index:=0; posx:=posx+400;
+  SetLength(barrera4,colum*filas);
+  for i:=0 to colum-1 do
+    for j:=0 to filas-1 do
+    begin
+      barrera4[index] := TBloqueo.Create(posx+i*tam, posy+j*tam, tam);
+      Inc(index);
+    end;
+end;
+
+
+procedure Tpantalla.CrearEnemigos(CantEnemigos, PosIX, PosIY: Word);
+begin
+  SetLength(EnemigosAliens,CantEnemigos);
+  EnemigosAliens[0]:=enemigo.Create;
+  EnemigosAliens[0].CargarImagen('enemigos\alien3.png');
+  EnemigosAliens[0].x:=(AnchoPantalla div 2)-(EnemigosAliens[0].Ancho div 2);
+  EnemigosAliens[0].y:=LargoPantalla-500;
 end;
 
 procedure Tpantalla.FormCreate(Sender: TObject);
 begin
-  img:=TJPEGIMage.Create;
+  AnchoPantalla:=Screen.Width;
+  LargoPantalla:=Screen.Height;
+  p:=Personaje.Create; p.x:=(AnchoPantalla div 2)-(p.Ancho div 2); p.y:=LargoPantalla-200;
+  p.CargarImagen('personaje.png');
+  fondo:=TJPEGIMage.Create;
   DoubleBuffered:=True; keypreview:=True;
-  player:=Tplayer.Create;
-  player.px:=800; player.py:=1100; player.tamtri:=15; player.tamrectan:=45;
-  player.colplay:=ClLime;
   showcursor(False);
-//  SetLength(barrera,32);
-  crearbarrera(8,4,10,300,500);
+  fondo.LoadFromFile('fondo.jpg');
+  crearbarrera(12,6,10,300,p.y-110);
+  CrearEnemigos(1,200,100);
   contdes:=0;
 
-//  img.LoadFromFile('llama.jpg');
+
 end;
 
 procedure Tpantalla.FormDblClick(Sender: TObject);
@@ -93,86 +116,50 @@ procedure Tpantalla.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var i:Word;
 begin
-{  if (Key=ord('A'))and(TriX>=60) then
-    TriX:=TriX-10
-  else if (Key=ord('D'))and(TriX<=740) then
-    TriX:=TriX+10;
-    if key=VK_Return then
-      TriY:=TriY-10;
-    if ssShift in shift then
-      TriY:=TriY+10;                }
   case key of
-    ord('A'):if (player.px>player.tamrectan+15) then player.px:=player.px-8;
-    ord('D'):if (player.px<1600-player.tamrectan-15) then player.px:=player.px+8;
-  end;
-
-  case key of
+    37: IzqPers:=True;
+    39: DerPers:=True;
     ord('F'):
-    begin 
-    barrera[contdes].Destruir; inc(contdes);  
+    begin
+      barrera[contdes].Destruir;
+      barrera2[contdes].Destruir;
+      inc(contdes);
+      Exit;
     end;
   end;
-  
   Invalidate;
+end;
+
+procedure Tpantalla.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  case key of
+    37:IzqPers:=False;
+    39:DerPers:=False;
+  end;
 end;
 
 procedure Tpantalla.FormPaint(Sender: TObject);
 var i:Word;
 begin
-{ Canvas.Draw(300,50,img); }
-  player.Dibujar(Canvas);
+  Canvas.StretchDraw(Rect(0,0,Screen.Width,Screen.Height),fondo);
+  Canvas.Draw(p.x,p.y,p.Imagen);
   for i:=0 to High(barrera) do
     barrera[i].Dibujar(Canvas);
+  for i:=0 to High(barrera2) do
+    barrera2[i].Dibujar(Canvas);
+  for i:=0 to High(barrera3) do
+    barrera3[i].Dibujar(Canvas);
+  for i:=0 to High(barrera4) do
+    barrera4[i].Dibujar(Canvas);
+  Canvas.Draw(EnemigosAliens[0].x,EnemigosAliens[0].y,EnemigosAliens[0].Imagen);
 end;
 
-procedure Tpantalla.Shape1MouseMove(Sender: TObject; Shift: TShiftState; X,
-  Y: Integer);
+procedure Tpantalla.TimerPersonajeTimer(Sender: TObject);
 begin
- { Shape1.Left:=X;
-  Shape1.Top:=Y;}
-end;
-
-
-{ player }
-
-constructor Tplayer.Create;
-begin
-
-end;
-
-procedure Tplayer.Dibujar(Canvas: TCanvas);
-begin
-  Canvas.Pen.Width:=4;
-  Canvas.Pen.Color:=colplay;
-  Canvas.Brush.Color:=colplay;
-  Canvas.Rectangle(px-tamrectan, py-tamrectan, px+tamrectan, py+tamrectan-40);
-
-  TpTrian[0]:=Point(px,py-63);
-  TpTrian[1]:=Point(px-tamtri,py+tamtri-63);
-  TpTrian[2]:=Point(px+tamtri,py+tamtri-63);
-  Canvas.Polygon(TpTrian);
-end;
-
-{ TBloqueo }
-
-constructor TBloqueo.Create(ax, ay, xtam: Word);
-begin
-  x:=ax; y:=ay; tam:=xtam; vivo:=True;
-end;
-
-procedure TBloqueo.Destruir;
-begin
-  vivo:=False;
-end;
-
-procedure TBloqueo.Dibujar(Canvas: TCanvas);
-begin
-  if vivo then
-  begin
-    Canvas.Brush.Color := clLime;
-    Canvas.Pen.Color := clLime;
-    Canvas.Rectangle(x, y, x + tam, y + tam);
-  end;
+  if (IzqPers)and(p.x>(p.Ancho div 2)-50) then p.x:=p.x-10;
+  if (DerPers)and(p.x+p.Ancho<AnchoPantalla) then p.x:=p.x+10;
+  Repaint;
 end;
 
 end.

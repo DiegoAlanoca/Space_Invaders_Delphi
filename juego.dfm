@@ -6,6 +6,7 @@ object pantalla: Tpantalla
   ClientHeight = 1200
   ClientWidth = 1600
   Color = clWindowFrame
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -12
@@ -16,21 +17,25 @@ object pantalla: Tpantalla
   OnCreate = FormCreate
   OnDblClick = FormDblClick
   OnKeyDown = FormKeyDown
+  OnKeyUp = FormKeyUp
   OnPaint = FormPaint
   TextHeight = 15
   object Label1: TLabel
     Left = 1520
     Top = 16
-    Width = 54
+    Width = 53
     Height = 15
     Caption = '1600x1200'
   end
-  object Shape1: TShape
-    Left = 792
-    Top = 83
-    Width = 121
-    Height = 118
-    Shape = stCircle
-    OnMouseMove = Shape1MouseMove
+  object TimerPersonaje: TTimer
+    Interval = 10
+    OnTimer = TimerPersonajeTimer
+    Left = 56
+    Top = 48
+  end
+  object TimerEnemigos: TTimer
+    Interval = 10
+    Left = 168
+    Top = 48
   end
 end
