@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,JPEG, Vcl.StdCtrls, Vcl.ExtCtrls,PngImage,ClasePersonaje,
   BloqueoClase,ClaseEnemigo, Vcl.MPlayer,ClaseBala;
-const VelocidadBalaJugador=40; CantEnemigosColumnas=11;CantEnemigosFilas=5;
+const VelocidadBalaJugador=80; CantEnemigosColumnas=11;CantEnemigosFilas=5;
 DistanciaHorzEnem=110; DistanciaFilEnem=70; Velocidad_Enemigo=3; //Impar por proporcion
 DistanciaFilBajadasMovimiento=4; MargenMovimientoHorzAlien=50;
 
@@ -20,6 +20,7 @@ type
     TPlayerMusFondo: TMediaPlayer;
     Colisiones: TTimer;
     score: TLabel;
+    Repintado: TTimer;
     procedure FormPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -29,6 +30,7 @@ type
     procedure TimerEnemigosYBalasTimer(Sender: TObject);
     procedure ColisionesTimer(Sender: TObject);
     procedure TPlayerMusFondoNotify(Sender: TObject);
+    procedure RepintadoTimer(Sender: TObject);
   private
     IzqPers,DerPers:Boolean; AnchoPantalla,LargoPantalla,ContadorScore:Word;
     fondo: TJPEGIMage;
@@ -79,7 +81,7 @@ begin
   while I<length(BalasEnemigos) do
   begin
     Randomize; J:=Random(CantEnemigosColumnas*CantEnemigosFilas-1);
-    VelocidadBalaEnemigos:=Random(40)+1;
+    VelocidadBalaEnemigos:=Random(35)+10;
     if EnemigosAliens[J].Vivo then
     begin
       BalasEnemigos[I]:=TBala.create(VelocidadBalaEnemigos);
@@ -224,7 +226,6 @@ begin
                 p.Vivo:=True;
               end;
   end;
-  Invalidate;
 end;
 
 procedure Tpantalla.FormKeyUp(Sender: TObject; var Key: Word;
@@ -310,6 +311,11 @@ begin
 end;
 
 
+procedure Tpantalla.RepintadoTimer(Sender: TObject);
+begin
+  Repaint;
+end;
+
 procedure Tpantalla.TimerEnemigosYBalasTimer(Sender: TObject);
 var I,J:Integer; BanBalasTodas,TodosEnemVivos:Boolean;
 begin
@@ -317,7 +323,8 @@ begin
   else BalaJugador.Vivo:=False;
 
   for I:=0 to CantBalasEnemigasEnPant-1 do
-  if (BalasEnemigos[I].Vivo)and(BalasEnemigos[I].y<LargoPantalla) then BalasEnemigos[I].y:=BalasEnemigos[I].y+10
+  if (BalasEnemigos[I].Vivo)and(BalasEnemigos[I].y<LargoPantalla) then
+  BalasEnemigos[I].y:=BalasEnemigos[I].y+BalasEnemigos[I].Velocidad
   else BalasEnemigos[I].Vivo:=False;
 
   BanBalasTodas:=False;
@@ -351,8 +358,6 @@ procedure Tpantalla.TimerPersonajeTimer(Sender: TObject);
 begin
   if (IzqPers)and(p.x>(p.Ancho div 2)-50) then p.x:=p.x-10;
   if (DerPers)and(p.x+p.Ancho<AnchoPantalla) then p.x:=p.x+10;
-  Repaint;
-  Update;
 end;
 
 procedure Tpantalla.TPlayerMusFondoNotify(Sender: TObject);

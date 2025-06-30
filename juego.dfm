@@ -53,21 +53,27 @@ object pantalla: Tpantalla
     OnNotify = TPlayerMusFondoNotify
   end
   object TimerPersonaje: TTimer
-    Interval = 15
+    Interval = 16
     OnTimer = TimerPersonajeTimer
     Left = 72
     Top = 408
   end
   object TimerEnemigosYBalas: TTimer
-    Interval = 15
+    Interval = 16
     OnTimer = TimerEnemigosYBalasTimer
     Left = 184
     Top = 408
   end
   object Colisiones: TTimer
-    Interval = 15
+    Interval = 16
     OnTimer = ColisionesTimer
     Left = 288
+    Top = 408
+  end
+  object Repintado: TTimer
+    Interval = 16
+    OnTimer = RepintadoTimer
+    Left = 352
     Top = 408
   end
 end
