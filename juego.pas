@@ -7,7 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,JPEG, Vcl.StdCtrls, Vcl.ExtCtrls,PngImage,ClasePersonaje,
   BloqueoClase,ClaseEnemigo, Vcl.MPlayer,ClaseBala;
 const VelocidadBalaJugador=40; CantEnemigosColumnas=11;CantEnemigosFilas=5;
-DistanciaHorzEnem=110; DistanciaFilEnem=70;
+DistanciaHorzEnem=110; DistanciaFilEnem=70; Velocidad_Enemigo=3; //Impar por proporcion
+DistanciaFilBajadasMovimiento=4; MargenMovimientoHorzAlien=50;
 
 EspaciadoHorzBarreras=400; PosicionX_Inicial_barreras=300; Columnas_Barrera=12; Filas_Barrera=6;
 TamBloqBarrera=10;
@@ -16,8 +17,9 @@ type
     Label1: TLabel;
     TimerPersonaje: TTimer;
     TimerEnemigosYBalas: TTimer;
-    MediaPlayer1: TMediaPlayer;
+    TPlayerMusFondo: TMediaPlayer;
     Colisiones: TTimer;
+    score: TLabel;
     procedure FormPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -26,8 +28,9 @@ type
     procedure TimerPersonajeTimer(Sender: TObject);
     procedure TimerEnemigosYBalasTimer(Sender: TObject);
     procedure ColisionesTimer(Sender: TObject);
+    procedure TPlayerMusFondoNotify(Sender: TObject);
   private
-    IzqPers,DerPers:Boolean; AnchoPantalla,LargoPantalla:Word;
+    IzqPers,DerPers:Boolean; AnchoPantalla,LargoPantalla,ContadorScore:Word;
     fondo: TJPEGIMage;
     p:Personaje;
     contdes,PosicionYIBarrera:Word;
@@ -39,10 +42,13 @@ type
     BalaJugador:TBala;
     CantBalasEnemigasEnPant:Word;
     BalasEnemigos:Array of TBala;
+    DireccionDerechaAliens:Boolean;
     procedure crearbarrera(colum,filas,tam,posx,posy:Word);
     procedure CrearEnemigos(PosIX,PosIY:Word);
     procedure CrearBalasEnemigos;
-    procedure VerificarColisionesBarreras;
+    procedure VerificarColisionesBarrerasSuperior;
+    procedure VerificarColisionesBarrerasInferior;
+    procedure MovimientoDeAliens;
   public
     { Public declarations }
   end;
@@ -139,6 +145,13 @@ begin
       EnemigosAliens[I-1].x:=DistanciaEnemXActual-(EnemigosAliens[I-1].Ancho div 2);
       EnemigosAliens[I-1].y:=PosicionYActual;
       DistanciaEnemXActual:=DistanciaEnemXActual+DistanciaHorzEnem;
+      case J of
+       1:EnemigosAliens[I-1].Valor:=30;
+       2:EnemigosAliens[I-1].Valor:=20;
+       3:EnemigosAliens[I-1].Valor:=20;
+       4:EnemigosAliens[I-1].Valor:=10;
+       5:EnemigosAliens[I-1].Valor:=10;
+      end;
       Inc(I);
     until I=Itemp;
     PosicionYActual:=PosicionYActual+DistanciaFilEnem;
@@ -163,6 +176,18 @@ begin
   BalaJugador:=TBala.Create(VelocidadBalaJugador);
   BalaJugador.CargarImagen('bala.png');
   CrearBalasEnemigos;
+  DireccionDerechaAliens:=True;
+  ContadorScore:=0;
+  try
+    TPlayerMusFondo.FileName := 'sonidos\Background.mp3';
+    TPlayerMusFondo.Open;
+    TPlayerMusFondo.Notify := True;
+    TPlayerMusFondo.OnNotify := TPlayerMusFondoNotify;
+    TPlayerMusFondo.Play;
+    except
+    on E: Exception do
+      ShowMessage('Error al cargar la música de fondo: ' + E.Message);
+  end;
 end;
 
 procedure Tpantalla.FormDblClick(Sender: TObject);
@@ -185,13 +210,10 @@ begin
                 BalaJugador.y:=p.y;
               end;
               end;
-    ord('F'):
-    begin
-      barrera[contdes].Destruir;
-      barrera2[contdes].Destruir;
-      inc(contdes);
-      Exit;
-    end;
+    ord('V'):begin
+              if not p.Vivo then
+                p.Vivo:=True;
+              end;
   end;
   Invalidate;
 end;
@@ -232,8 +254,55 @@ begin
 
 end;
 
+procedure Tpantalla.MovimientoDeAliens;
+var i,movimientoX, movimientoY:Integer; tocoElBorde: Boolean;
+begin
+  tocoElBorde := False;
+  for i := 0 to High(EnemigosAliens) do
+  begin
+    if EnemigosAliens[i].Vivo then
+    begin
+      if (EnemigosAliens[i].x + EnemigosAliens[i].Ancho >= AnchoPantalla-MargenMovimientoHorzAlien) and
+      (DireccionDerechaAliens) then
+      begin
+        tocoElBorde := True;
+        break;
+      end;
+      if (EnemigosAliens[i].x <= MargenMovimientoHorzAlien) and (not DireccionDerechaAliens) then
+      begin
+        tocoElBorde := True;
+        break;
+      end;
+    end;
+  end;
+
+  if tocoElBorde then
+  begin
+    DireccionDerechaAliens := not DireccionDerechaAliens;
+    movimientoY := DistanciaFilBajadasMovimiento;
+  end
+  else
+  begin
+    movimientoY := 0;
+  end;
+  if DireccionDerechaAliens then
+    movimientoX := Velocidad_Enemigo
+  else
+    movimientoX := -Velocidad_Enemigo;
+
+  for i := 0 to High(EnemigosAliens) do
+  begin
+    if EnemigosAliens[i].Vivo then
+    begin
+      EnemigosAliens[i].x := EnemigosAliens[i].x + movimientoX;
+      EnemigosAliens[i].y := EnemigosAliens[i].y + movimientoY;
+    end;
+  end;
+end;
+
+
 procedure Tpantalla.TimerEnemigosYBalasTimer(Sender: TObject);
-var I,J:Integer; BanBalasTodas:Boolean;
+var I,J:Integer; BanBalasTodas,TodosEnemVivos:Boolean;
 begin
   if (BalaJugador.Vivo)and(BalaJugador.y>1) then BalaJugador.y:=BalaJugador.y-VelocidadBalaJugador
   else BalaJugador.Vivo:=False;
@@ -251,9 +320,21 @@ begin
     else BanBalasTodas:=False;
   if BanBalasTodas=False then CrearBalasEnemigos;
 
-  {Movimiento Aliens}
+  MovimientoDeAliens;
 
+  for I:=0 to High(EnemigosAliens) do
+    if EnemigosAliens[I].Vivo then
+    begin
+      TodosEnemVivos:=True;
+      Break;
+    end
+    else TodosEnemVivos:=False;
 
+  if TodosEnemVivos=False then
+  begin
+    Application.Terminate;
+    Showmessage('GANASTE');
+  end;
 end;
 
 procedure Tpantalla.TimerPersonajeTimer(Sender: TObject);
@@ -262,6 +343,18 @@ begin
   if (DerPers)and(p.x+p.Ancho<AnchoPantalla) then p.x:=p.x+10;
   Repaint;
   Update;
+end;
+
+procedure Tpantalla.TPlayerMusFondoNotify(Sender: TObject);
+var mp: TMediaPlayer;
+begin
+  mp := Sender as TMediaPlayer;
+  if mp.NotifyValue = nvSuccessful then
+  begin
+    mp.Position := 0;
+    mp.Play;
+    mp.Notify := True;
+  end;
 end;
 
 procedure Tpantalla.ColisionesTimer(Sender: TObject);
@@ -275,6 +368,8 @@ begin
     then
     begin
       EnemigosAliens[I].Vivo:=False;
+      ContadorScore:=ContadorScore+EnemigosAliens[I].Valor;
+      score.Caption:=IntToStr(ContadorScore);
       BalaJugador.Vivo:=False;
     end;
   end;
@@ -292,18 +387,36 @@ begin
         begin
           p.Vivo := False;
           BalasEnemigos[I].Vivo := False;
-          ShowMessage('Game Over');
+          IzqPers:=False;
+          DerPers:=False;
+          ShowMessage('Game Over. Presiona "V" para otra moneda');
           break;
         end;
       end;
     end;
   end;
-  VerificarColisionesBarreras;
-
+  VerificarColisionesBarrerasSuperior;
 end;
 
-procedure Tpantalla.VerificarColisionesBarreras;
-var I,J,PosActX:Integer;
+procedure Tpantalla.VerificarColisionesBarrerasInferior;
+var I,PosActX:Integer;
+begin
+//BalaJugador
+  PosActX:=PosicionX_Inicial_barreras;
+    if (BalaJugador.Vivo) then
+      if (BalaJugador.y>=PosicionYIBarrera+(Filas_Barrera*TamBloqBarrera))  and  //Otro and para que este dentro de barrera
+      (BalaJugador.x>=PosActX+(Columnas_Barrera*TamBloqBarrera))  and
+      (BalaJugador.x<=PosActX)
+      then
+      begin
+        BalaJugador.Vivo:=False; randomize;
+        barrera[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
+  PosActX:=PosActX+DistanciaHorzEnem;
+end;
+
+procedure Tpantalla.VerificarColisionesBarrerasSuperior;
+var I,PosActX:Integer;
 begin
   PosActX:=PosicionX_Inicial_barreras;
   for I:=0 to length(BalasEnemigos)-1 do

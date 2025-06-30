@@ -26,30 +26,48 @@ object pantalla: Tpantalla
     Height = 15
     Caption = '1600x1200'
   end
-  object MediaPlayer1: TMediaPlayer
-    Left = 32
-    Top = 144
+  object score: TLabel
+    Left = 8
+    Top = 8
+    Width = 145
+    Height = 58
+    Caption = 'score'
+    Color = clWindow
+    FocusControl = TPlayerMusFondo
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWhite
+    Font.Height = -48
+    Font.Name = 'Unispace'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    Transparent = True
+  end
+  object TPlayerMusFondo: TMediaPlayer
+    Left = 48
+    Top = 504
     Width = 253
     Height = 30
     Visible = False
     TabOrder = 0
+    OnNotify = TPlayerMusFondoNotify
   end
   object TimerPersonaje: TTimer
     Interval = 15
     OnTimer = TimerPersonajeTimer
-    Left = 56
-    Top = 48
+    Left = 72
+    Top = 408
   end
   object TimerEnemigosYBalas: TTimer
     Interval = 15
     OnTimer = TimerEnemigosYBalasTimer
-    Left = 168
-    Top = 48
+    Left = 184
+    Top = 408
   end
   object Colisiones: TTimer
     Interval = 15
     OnTimer = ColisionesTimer
-    Left = 272
-    Top = 48
+    Left = 288
+    Top = 408
   end
 end
