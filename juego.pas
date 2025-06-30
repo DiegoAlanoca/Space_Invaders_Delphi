@@ -61,8 +61,17 @@ implementation
 {$R *.dfm}
 
 procedure Tpantalla.CrearBalasEnemigos;
-var I,J,VelocidadBalaEnemigos: Integer;
+var I,J,VelocidadBalaEnemigos: Integer; InvadersActivos:Boolean;
 begin
+  InvadersActivos:=False;
+  for I:=0 to High(EnemigosAliens) do
+    if EnemigosAliens[I].Vivo then
+    begin
+      InvadersActivos:=True;
+      Break;
+    end;
+  if not InvadersActivos then Exit;
+
   Randomize;
   CantBalasEnemigasEnPant:=Random(6)+1;
   Setlength(BalasEnemigos,CantBalasEnemigasEnPant);
@@ -178,7 +187,7 @@ begin
   CrearBalasEnemigos;
   DireccionDerechaAliens:=True;
   ContadorScore:=0;
-  try
+{  try
     TPlayerMusFondo.FileName := 'sonidos\Background.mp3';
     TPlayerMusFondo.Open;
     TPlayerMusFondo.Notify := True;
@@ -187,7 +196,7 @@ begin
     except
     on E: Exception do
       ShowMessage('Error al cargar la música de fondo: ' + E.Message);
-  end;
+  end;       }
 end;
 
 procedure Tpantalla.FormDblClick(Sender: TObject);
@@ -311,29 +320,30 @@ begin
   if (BalasEnemigos[I].Vivo)and(BalasEnemigos[I].y<LargoPantalla) then BalasEnemigos[I].y:=BalasEnemigos[I].y+10
   else BalasEnemigos[I].Vivo:=False;
 
+  BanBalasTodas:=False;
   for I:=0 to length(BalasEnemigos)-1 do
     if BalasEnemigos[I].Vivo then
     begin
       BanBalasTodas:=True;
       Break;
-    end
-    else BanBalasTodas:=False;
+    end;
+
   if BanBalasTodas=False then CrearBalasEnemigos;
 
   MovimientoDeAliens;
 
+  TodosEnemVivos:=False;
   for I:=0 to High(EnemigosAliens) do
     if EnemigosAliens[I].Vivo then
     begin
       TodosEnemVivos:=True;
       Break;
-    end
-    else TodosEnemVivos:=False;
+    end;
 
   if TodosEnemVivos=False then
   begin
-    Application.Terminate;
     Showmessage('GANASTE');
+    Application.Terminate;
   end;
 end;
 
@@ -396,6 +406,7 @@ begin
     end;
   end;
   VerificarColisionesBarrerasSuperior;
+  VerificarColisionesBarrerasInferior;
 end;
 
 procedure Tpantalla.VerificarColisionesBarrerasInferior;
@@ -404,15 +415,40 @@ begin
 //BalaJugador
   PosActX:=PosicionX_Inicial_barreras;
     if (BalaJugador.Vivo) then
-      if (BalaJugador.y>=PosicionYIBarrera+(Filas_Barrera*TamBloqBarrera))  and  //Otro and para que este dentro de barrera
-      (BalaJugador.x>=PosActX+(Columnas_Barrera*TamBloqBarrera))  and
-      (BalaJugador.x<=PosActX)
+      if (BalaJugador.x<=PosActX+(Columnas_Barrera*TamBloqBarrera))  and
+      (BalaJugador.x>=PosActX)
       then
       begin
         BalaJugador.Vivo:=False; randomize;
         barrera[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
       end;
-  PosActX:=PosActX+DistanciaHorzEnem;
+  PosActX:=PosActX+EspaciadoHorzBarreras;
+    if (BalaJugador.Vivo) then
+      if (BalaJugador.x<=PosActX+(Columnas_Barrera*TamBloqBarrera))  and
+      (BalaJugador.x>=PosActX)
+      then
+      begin
+        BalaJugador.Vivo:=False; randomize;
+        barrera2[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
+  PosActX:=PosActX+EspaciadoHorzBarreras;
+      if (BalaJugador.Vivo) then
+      if (BalaJugador.x<=PosActX+(Columnas_Barrera*TamBloqBarrera))  and
+      (BalaJugador.x>=PosActX)
+      then
+      begin
+        BalaJugador.Vivo:=False; randomize;
+        barrera3[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
+  PosActX:=PosActX+EspaciadoHorzBarreras;
+        if (BalaJugador.Vivo) then
+      if (BalaJugador.x<=PosActX+(Columnas_Barrera*TamBloqBarrera))  and
+      (BalaJugador.x>=PosActX)
+      then
+      begin
+        BalaJugador.Vivo:=False; randomize;
+        barrera4[Random(Columnas_Barrera*Filas_Barrera)].vivo:=False;
+      end;
 end;
 
 procedure Tpantalla.VerificarColisionesBarrerasSuperior;
